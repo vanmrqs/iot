@@ -1,22 +1,26 @@
 #include <Keypad.h>
 
-const byte linhas  = 4;
-const byte colunas = 4;
+const byte LINHAS  = 4;
+const byte COLUNAS = 4;
 
-char teclado[linhas][colunas] = {
+const byte NUMERO_TENTATIVAS = 3;
+const byte TAMANHO_SENHA     = 4;
+
+char teclado[LINHAS][COLUNAS] = {
   {'1', '2', '3', 'A'},
   {'4', '5', '6', 'B'},
   {'7', '8', '9', 'C'},
   {'*', '0', '#', 'D'}
 };
 
-byte pinosLinhas[linhas]   = {11, 10, 9, 8};
-byte pinosColunas[colunas] = {7, 6, 5, 4};
+byte pinosLinhas[LINHAS]   = {11, 10, 9, 8};
+byte pinosColunas[COLUNAS] = {7, 6, 5, 4};
 
-Keypad keypad = Keypad(makeKeymap(teclado), pinosLinhas, pinosColunas, linhas, colunas);
+Keypad keypad = Keypad(makeKeymap(teclado), pinosLinhas, pinosColunas, LINHAS, COLUNAS);
 
-char senha[4];
+char senha[TAMANHO_SENHA];
 int i = 0;
+int numeroTentativas = 0;
 
 void setup(){
   Serial.begin(9600);
@@ -25,23 +29,26 @@ void setup(){
 void loop(){
  char entrada = keypad.getKey();
   
-  if ( entrada == '*' ) {
-   	resetaSenha(senha);
-    i = 0;
-  } else if ( entrada ) {
-  	senha[i] = entrada;
-    i++;
-  }
-  
-  if ( i == 4 ) {
-  	Serial.println(verificaSenha(senha));
-    resetaSenha(senha);
-    i = 0;
-  }
+ if ( entrada == '*' ) {
+   resetaSenha(senha);
+   i = 0;
+   numeroTentativas = 0;
+   Serial.println("Tentativas e senha resetada");
+ } else if ( entrada ) {
+   senha[i] = entrada;
+   i++;
+ }
+
+ if ( ( numeroTentativas < NUMERO_TENTATIVAS ) && (i == TAMANHO_SENHA) ) {
+   numeroTentativas++;
+   Serial.println(verificaSenha(senha));
+   resetaSenha(senha);
+   i = 0;
+ }
 }
 
 String verificaSenha(char senha[4]){
-  if ( ! strncmp(senha, "1234", 4) ) {
+  if ( ! strncmp(senha, "1234", TAMANHO_SENHA) ) {
   	return "Senha correta";
   }
   
@@ -49,7 +56,7 @@ String verificaSenha(char senha[4]){
 }
 
 void resetaSenha(char senha[4]){
-	for( i = 0; i < 4; i++ ) {
+	for( i = 0; i < TAMANHO_SENHA; i++ ) {
     	senha[i] = NULL;
     }
 }
